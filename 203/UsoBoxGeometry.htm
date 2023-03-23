@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>My first three.js app</title>
+		<style>
+			body { margin: 0; }
+		</style>
+	</head>
+	<body>
+		<script type="module">
+			import * as THREE from 'https://unpkg.com/three/build/three.module.js';
+
+			const scene = new THREE.Scene();
+			const camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.1, 1000 );
+
+            const renderer = new THREE.WebGLRenderer();
+			renderer.setSize( window.innerWidth, window.innerHeight );
+			document.body.appendChild( renderer.domElement );
+
+            //Grid Helper: Rejilla para establecer un piso
+            const size = 10;
+            const divisions = 20;
+
+            const gridHelper = new THREE.GridHelper( size, divisions );
+            scene.add( gridHelper );
+            
+            //Axes Helper: Linea en el eje x, y, z, ayuda a entender la perspectiva
+            const axesHelper = new THREE.AxesHelper( 2 );
+            axesHelper.setColors( 0xffff00,  0xff0000, 0x0000ff);
+            scene.add( axesHelper );
+
+            /*Luz direccional: Una luz directa apuntando desde arriba al cubo de en medio
+            //Crea un reflejo en la parte superior de los cubos
+            //Codigo apoyado de:https://programmerclick.com/article/81771039238/
+            */
+            var pointColor = "#ff5808";
+            var directionalLight = new THREE.DirectionalLight(pointColor);
+            directionalLight.position.set(2, 10, 0);
+            directionalLight.castShadow = true;
+            directionalLight.shadowCameraNear = 2;
+            directionalLight.shadowCameraFar = 200;
+            directionalLight.shadowCameraLeft = -50;
+            directionalLight.shadowCameraRight = 50;
+            directionalLight.shadowCameraTop = 50;
+            directionalLight.shadowCameraBottom = -50;
+        
+            directionalLight.distance = 15;
+            directionalLight.intensity = 30;
+            directionalLight.shadowMapHeight = 1024;
+            directionalLight.shadowMapWidth = 1024;
+        
+            scene.add(directionalLight);
+
+            /*Luz Ambiental: genera una iluminacion calida simulando la luz del sol
+            //Codigo apoyado de:https://programmerclick.com/article/81771039238/
+            */
+            var ambiColor = "#0c0c0c";
+            var ambientLight = new THREE.AmbientLight(ambiColor,5);
+            scene.add(ambientLight);
+
+            //Cubos (ponerlo en arreglos)
+
+            const geometry1 = new THREE.BoxGeometry( 1, 1, 1 );
+			const material1 = new THREE.MeshPhongMaterial( { color: 0x00ff00 } );
+			const cubo1 = new THREE.Mesh( geometry1, material1 );
+			scene.add( cubo1 );
+            
+            const geometry2 = new THREE.BoxGeometry( 1, 1, 1 );
+			const material2 = new THREE.MeshPhongMaterial( { color: 0x0000ff,transparent: true, opacity: 0.8} );
+			const cubo2 = new THREE.Mesh( geometry2, material2 );
+            cubo2.scale.set(1.5,1.5,1.5);
+            cubo2.position.set(2,0,0)
+			scene.add( cubo2 );
+
+            const geometry3 = new THREE.BoxGeometry( 1, 1, 1 );
+            //Apoyo codigo: https://dustinpfister.github.io/2019/06/06/threejs-alpha-map/ para la textura
+            const canvas = document.createElement('canvas'),
+            ctx = canvas.getContext('2d');
+            canvas.width = 64;
+            canvas.height = 64;
+            ctx.fillStyle = '#404040';
+            ctx.fillRect(0, 0, 32, 32);
+            ctx.fillStyle = '#808080';
+            ctx.fillRect(32, 0, 32, 32);
+            ctx.fillStyle = '#c0c0c0';
+            ctx.fillRect(0, 32, 32, 32);
+            ctx.fillStyle = '#f0f0f0';
+            ctx.fillRect(32, 32, 32, 32);
+            const texture = new THREE.CanvasTexture(canvas);
+            const material3 = new THREE.MeshPhongMaterial( { color: 0x00ffff,alphaMap: texture,transparent: true,opacity: 1,side: THREE.DoubleSide} );
+            const cubo3 = new THREE.Mesh( geometry3, material3 );
+            cubo3.scale.set(1.2,1.1,1.1);
+            cubo3.position.set(4,0,0);
+            cubo3.rotation.set(Math.PI/1,1,1);
+			scene.add( cubo3 );
+            
+
+            //Posicion de la camara
+            camera.position.x = 2;
+            camera.position.y = 0.5;
+			camera.position.z = 4;
+
+            //Anima los cubos para que roten sobre su propio eje:
+            function animate() {
+				requestAnimationFrame( animate );
+
+				cubo1.rotation.x += 0.01;
+				cubo1.rotation.y += 0.01;
+
+                cubo2.rotation.x += 0.01;
+				cubo2.rotation.y += 0.01;
+
+                cubo3.rotation.x += 0.01;
+				cubo3.rotation.y += 0.01;
+
+				renderer.render( scene, camera );
+			}
+			animate();
+
+		</script>
+	</body>
+</html>
